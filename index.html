@@ -15,13 +15,32 @@
     input[type=number] { -moz-appearance: textfield; }
     body {font-family: "Roboto Condensed", sans-serif;}
     .catalog-title { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;     /* 긴 단어/BR도 자연스럽게 줄바꿈 */}
+    /* 모바일에서 스크롤 시 헤더 축소 */
+    @media (max-width: 640px) {
+    #siteHeader .header-inner {
+        transition: padding 200ms ease;
+    }
+    #siteHeader.shrink .header-inner {
+        padding-top: 0.20rem;   /* py-2 */
+        padding-bottom: 0.20rem;
+    }
+    /* 부제 숨기기(줄 높이 절감) */
+    #siteHeader.shrink #subtitle { display: none; }
+
+    /* 브랜드명/로고 살짝 압축 (선택) */
+    #siteHeader.shrink #brand-name { display: none; }
+    #siteHeader.shrink #brandLogo { width: 100px !important; }
+
+    /* 우상단 링크 위치도 살짝 올리기 */
+    #siteHeader.shrink #headerLinks { top: 0.5rem; right: 0.5rem; }
+    }
   </style>
 </head>
 <body class="min-h-screen bg-neutral-50">
-  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-neutral-200">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between relative">
+  <header id="siteHeader" class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-neutral-200">
+    <div class="header-inner max-w-5xl mx-auto px-4 py-4 flex items-center justify-between relative">
       <div class="flex items-center" style="display: block; margin: 0 auto;">
-        <div style="width: 200px; margin: 0 auto;"><img src="https://ai.esmplus.com/magicbean7/Order/magicbean-logo.jpg"></div>
+        <div id="brandLogo" style="width: 200px; margin: 0 auto;"><img src="https://ai.esmplus.com/magicbean7/Order/magicbean-logo.jpg"></div>
         <div style="text-align: center;">
           <h1 class="text-xl" id="brand-name" style="font-size: 18pt; font-weight: bold;">Magic Bean Games</h1>
           <p class="text-sm text-neutral-500" id="subtitle" style="font-size: 13pt; line-height: 40px;">2025 ESSEN SPIEL Preorder</p>
@@ -29,7 +48,7 @@
       </div>
 
       <!-- Top-right: website & Instagram -->
-<div class="absolute right-10 top-10 flex items-center gap-2">
+<div id="headerLinks" class="absolute right-10 top-10 flex items-center gap-2">
   <!-- Homepage -->
   <a
     href="https://www.magicbeangames.com" target="_blank" rel="noopener"
@@ -539,6 +558,16 @@ document.addEventListener('click', (e) => {
   }
 });
     
+// ===== Header shrink on scroll (mobile) =====
+function applyHeaderShrink() {
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  const header = document.getElementById('siteHeader');
+  if (!header) return;
+  if (y > 20) header.classList.add('shrink');
+  else header.classList.remove('shrink');
+}
+window.addEventListener('scroll', applyHeaderShrink, { passive: true });
+window.addEventListener('load', applyHeaderShrink);
   </script>
 </body>
 </html>
