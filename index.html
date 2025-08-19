@@ -90,7 +90,13 @@
 
   <main class="max-w-5xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-6" style="margin-bottom: 40px;">
     <section class="lg:col-span-2">
-      <p class="mb-6 text-neutral-600" id="intro">Preorder before ESSEN SPIEL. Choose quantities and leave your contact info.</p>
+      <p class="mb-6 text-neutral-600" id="intro">
+        Magic Bean Games – where fun brings the whole family together!<br>
+        Discover and experience our board games at Essen Spiel 2025 – and get your exclusive 20% discount!<br>
+        <br>**Simply preorder now and pick up your game at the Magicbean Games’ booth (5E410) during the Essen Spiel 2025. Payment is in cash upon collection.
+        <br>**Our newest release &#60;Silla: Smile of a Millenium&#62; comes in the Korean edition. 
+        Each main card shows the character abilities in Korean but don’t worry – we include stickers for the cards and rulebook in English as well, so everyone can share the fun!
+      </p>
       <div id="catalog" class="grid sm:grid-cols-2 gap-4"></div>
     </section>
 
@@ -345,7 +351,7 @@ function downloadCSV(name, email, notes){
       const list=$('#cart-list'); list.innerHTML=''; const cart=cartItems(); if(cart.length===0){ list.innerHTML=`<div class='text-sm text-neutral-500'>${CONFIG.TEXT.emptyCart}</div>`; } cart.forEach(c=>{ const row=document.createElement('div'); row.className='flex items-center justify-between text-sm'; row.innerHTML=`<div class='truncate pr-2'>${c.name} × ${c.qty}</div><div class='shrink-0 font-medium'>${fmt(c.lineTotal)}</div>`; list.appendChild(row); }); $('#total').textContent=fmt(cartTotal());
     }
 
-    function renderTexts(){ $('#brand-name').textContent=CONFIG.BRAND_NAME; $('#brand-foot').textContent=CONFIG.BRAND_NAME; $('#subtitle').textContent='ESSEN SPIEL Preorder'; $('#intro').textContent=CONFIG.TEXT.intro; $('#review-title').textContent=CONFIG.TEXT.review; $('#label-total').textContent=CONFIG.TEXT.total; $('#label-name').textContent=CONFIG.TEXT.name; $('#label-email').textContent=CONFIG.TEXT.email; $('#label-notes').textContent=CONFIG.TEXT.notes; $('#label-agree').textContent='I agree to the collection and use of my personal data.'; $('#submit').textContent=CONFIG.TEXT.submit; $('#btn-csv').textContent=CONFIG.TEXT.downloadCsv; $('#btn-mail').textContent=CONFIG.TEXT.emailDraft; $('#pickup-hint').textContent=`${CONFIG.TEXT.pickup} · ${CONFIG.CURRENCY}`; $('#year').textContent=new Date().getFullYear(); setStatus(null); }
+    function renderTexts(){ $('#brand-name').textContent=CONFIG.BRAND_NAME; $('#brand-foot').textContent=CONFIG.BRAND_NAME; $('#subtitle').textContent='ESSEN SPIEL Preorder'; $('#review-title').textContent=CONFIG.TEXT.review; $('#label-total').textContent=CONFIG.TEXT.total; $('#label-name').textContent=CONFIG.TEXT.name; $('#label-email').textContent=CONFIG.TEXT.email; $('#label-notes').textContent=CONFIG.TEXT.notes; $('#label-agree').textContent='I agree to the collection and use of my personal data.'; $('#submit').textContent=CONFIG.TEXT.submit; $('#btn-csv').textContent=CONFIG.TEXT.downloadCsv; $('#btn-mail').textContent=CONFIG.TEXT.emailDraft; $('#pickup-hint').textContent=`${CONFIG.TEXT.pickup} · ${CONFIG.CURRENCY}`; $('#year').textContent=new Date().getFullYear(); setStatus(null); }
 
     function render(){ renderTexts(); renderCatalog(); renderCart(); }
 
