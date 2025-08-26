@@ -236,26 +236,43 @@ const cartTotal = () => cartItems().reduce((s, i) => s + i.lineTotal, 0);
       return {ok:true};
     }
 
-    const payload = (name, email, notes) => ({
-  brand: CONFIG.BRAND_NAME,
-  language: 'en',
-  name: name.trim(),
-  email: email.trim(),
-  notes: notes.trim(),
-  total: cartTotal(),
-  currency: CONFIG.CURRENCY,
-  // ✅ 할인가 단가/합계가 들어가도록 수정
-  items: cartItems().map(c => ({
+    const payload = (name, email, notes) => {
+  const items = cartItems().map(c => ({
     id: c.id,
     name: c.name,
     qty: c.qty,
-    unitPrice: c.unitPrice,   // <- 여기!
-    lineTotal: c.lineTotal    // <- 그리고 여기!
-  })),
-  timestamp: new Date().toISOString(),
-  pickup: true,
-});
+    unitPrice: c.unitPrice,
+    lineTotal: c.lineTotal
+  }));
+  const total = cartTotal();
 
+  return {
+    // 메타 정보
+    _subject: `[Preorder] ${name} · ${fmt(total)} ${CONFIG.CURRENCY}`,
+    orderId: 'MB-' + new Date().toISOString().replace(/[-:T.Z]/g,'').slice(0,14),
+
+    // 사용자 입력
+    brand: CONFIG.BRAND_NAME,
+    language: 'en',
+    name: name.trim(),
+    email: email.trim(),
+    notes: notes.trim(),
+    pickup: true,
+    currency: CONFIG.CURRENCY,
+
+    // 합계
+    total_numeric: total,
+    total_display: fmt(total),
+
+    // ✅ Formspree Submissions에서 보이게 하고 싶은 단일 필드
+    items_summary_kr: `게임이름 | 수량 | 총금액\n${buildItemsSimple(items)}`,
+
+    timestamp: new Date().toISOString(),
+  };
+};
+function buildItemsSimple(items) {
+  return items.map(i => `${i.name} | ${i.qty} | ${fmt(i.lineTotal)}`).join('\n');
+}
 // CSV: receipt-like layout (safe & neat)
 function downloadCSV(name, email, notes){
   const p = payload(name, email, notes);
