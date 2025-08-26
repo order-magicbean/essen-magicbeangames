@@ -236,43 +236,26 @@ const cartTotal = () => cartItems().reduce((s, i) => s + i.lineTotal, 0);
       return {ok:true};
     }
 
-    const payload = (name, email, notes) => {
-  const items = cartItems().map(c => ({
+    const payload = (name, email, notes) => ({
+  brand: CONFIG.BRAND_NAME,
+  language: 'en',
+  name: name.trim(),
+  email: email.trim(),
+  notes: notes.trim(),
+  total: cartTotal(),
+  currency: CONFIG.CURRENCY,
+  // ✅ 할인가 단가/합계가 들어가도록 수정
+  items: cartItems().map(c => ({
     id: c.id,
     name: c.name,
     qty: c.qty,
-    unitPrice: c.unitPrice,
-    lineTotal: c.lineTotal
-  }));
-  const total = cartTotal();
+    unitPrice: c.unitPrice,   // <- 여기!
+    lineTotal: c.lineTotal    // <- 그리고 여기!
+  })),
+  timestamp: new Date().toISOString(),
+  pickup: true,
+});
 
-  return {
-    // 메타 정보
-    _subject: `[Preorder] ${name} · ${fmt(total)} ${CONFIG.CURRENCY}`,
-    orderId: 'MB-' + new Date().toISOString().replace(/[-:T.Z]/g,'').slice(0,14),
-
-    // 사용자 입력
-    brand: CONFIG.BRAND_NAME,
-    language: 'en',
-    name: name.trim(),
-    email: email.trim(),
-    notes: notes.trim(),
-    pickup: true,
-    currency: CONFIG.CURRENCY,
-
-    // 합계
-    total_numeric: total,
-    total_display: fmt(total),
-
-    // ✅ Formspree Submissions에서 보이게 하고 싶은 단일 필드
-    items_summary_kr: `게임이름 | 수량 | 총금액\n${buildItemsSimple(items)}`,
-
-    timestamp: new Date().toISOString(),
-  };
-};
-function buildItemsSimple(items) {
-  return items.map(i => `${i.name} | ${i.qty} | ${fmt(i.lineTotal)}`).join('\n');
-}
 // CSV: receipt-like layout (safe & neat)
 function downloadCSV(name, email, notes){
   const p = payload(name, email, notes);
@@ -345,6 +328,7 @@ function downloadCSV(name, email, notes){
         const res = await fetch(CONFIG.ENDPOINT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(p) });
         if(!res.ok) throw new Error('Network response was not ok');
         setStatus('success', `<div class='font-medium'>${CONFIG.TEXT.successTitle}</div><div class='text-neutral-600'>${CONFIG.TEXT.successBody}</div>`);
+        showOrderSuccess();  // ✅ 주문 완료 모달 띄우기
         quantities = Object.fromEntries(CONFIG.PRODUCTS.map(x=>[x.id,0])); $('#notes').value=''; $('#agree').checked = false; render();
       }catch(err){ setStatus('error', `${CONFIG.TEXT.errorTitle} <span class='text-neutral-500'>(${err.message||'submit failed'})</span><div class='text-neutral-600 mt-1'>${CONFIG.TEXT.errorBody}</div>`); }
       finally{ $('#submit').disabled = false; $('#submit').textContent = CONFIG.TEXT.submit; }
@@ -626,6 +610,25 @@ function applyHeaderShrink() {
 }
 window.addEventListener('scroll', applyHeaderShrink, { passive: true });
 window.addEventListener('load', applyHeaderShrink);
+function showOrderSuccess() {
+  document.getElementById('orderSuccessModal').classList.remove('hidden');
+}
+function closeOrderSuccess() {
+  document.getElementById('orderSuccessModal').classList.add('hidden');
+}
+
   </script>
+  <!-- ✅ 주문 완료 모달 -->
+<div id="orderSuccessModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl shadow-lg p-8 w-[90%] max-w-md text-center">
+    <h2 class="text-xl font-semibold mb-4">Order Completed!</h2>
+    <p class="text-neutral-600 mb-6">Your preorder has been received. We’ll email you a confirmation shortly.<br>
+    Please pick up your game at ESSEN SPIEL (Cash EUR).</p>
+    <button onclick="closeOrderSuccess()" class="px-6 py-2 rounded-xl bg-neutral-900 text-white hover:bg-black">
+      OK
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
