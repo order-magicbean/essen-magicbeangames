@@ -202,16 +202,26 @@
     let quantities = Object.fromEntries(CONFIG.PRODUCTS.map(p => [p.id, 0]));
 
     // ====== UTIL ======
-    const $ = sel => document.querySelector(sel);
-    const fmt = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: CONFIG.CURRENCY }).format(n || 0);
+    // ====== UTIL ======
+const $ = sel => document.querySelector(sel);
+const fmt = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: CONFIG.CURRENCY }).format(n || 0);
 
-    const itemsWithTotals = () => CONFIG.PRODUCTS.map(p => ({
-      ...p,
-      qty: Number(quantities[p.id] || 0),
-      lineTotal: (Number(quantities[p.id] || 0) * (p.price || 0))
-    }));
-    const cartItems = () => itemsWithTotals().filter(i => i.qty > 0);
-    const cartTotal = () => cartItems().reduce((s,i)=>s+i.lineTotal,0);
+const itemsWithTotals = () => CONFIG.PRODUCTS.map(p => {
+  const qty = Number(quantities[p.id] || 0);
+  // ✅ 할인가가 있으면 할인가, 없으면 정가
+  const unitPrice = (typeof p.salePrice === 'number') ? p.salePrice : (p.price || 0);
+
+  return {
+    ...p,
+    qty,
+    unitPrice,                       // <- 추가: 이후 곳곳에서 사용
+    lineTotal: qty * unitPrice       // <- 총액 계산을 할인가 기준으로
+  };
+});
+
+const cartItems = () => itemsWithTotals().filter(i => i.qty > 0);
+const cartTotal = () => cartItems().reduce((s, i) => s + i.lineTotal, 0);
+
 
     function setQty(id, val){ const v = Math.max(0, Math.min(99, Number(val)||0)); quantities[id] = v; renderCart(); renderCatalogQtyOnly(); }
 
@@ -227,17 +237,24 @@
     }
 
     const payload = (name, email, notes) => ({
-      brand: CONFIG.BRAND_NAME,
-      language: 'en',
-      name: name.trim(),
-      email: email.trim(),
-      notes: notes.trim(),
-      total: cartTotal(),
-      currency: CONFIG.CURRENCY,
-      items: cartItems().map(c=>({id:c.id, name:c.name, qty:c.qty, unitPrice:c.price, lineTotal:c.lineTotal})),
-      timestamp: new Date().toISOString(),
-      pickup: true,
-    });
+  brand: CONFIG.BRAND_NAME,
+  language: 'en',
+  name: name.trim(),
+  email: email.trim(),
+  notes: notes.trim(),
+  total: cartTotal(),
+  currency: CONFIG.CURRENCY,
+  // ✅ 할인가 단가/합계가 들어가도록 수정
+  items: cartItems().map(c => ({
+    id: c.id,
+    name: c.name,
+    qty: c.qty,
+    unitPrice: c.unitPrice,   // <- 여기!
+    lineTotal: c.lineTotal    // <- 그리고 여기!
+  })),
+  timestamp: new Date().toISOString(),
+  pickup: true,
+});
 
 // CSV: receipt-like layout (safe & neat)
 function downloadCSV(name, email, notes){
